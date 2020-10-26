@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/willshen8/gRPC-go/greet/greetpb"
@@ -21,7 +22,34 @@ func main() {
 	defer cc.Close()
 	c := greetpb.NewGreetServiceClient(cc)
 
-	doUnary(c)
+	//doUnary(c)
+
+	doServerStreaming(c)
+
+}
+
+func doServerStreaming(c greetpb.GreetServiceClient) {
+	log.Println(("Starting to do server streaming RPC..."))
+	req := &greetpb.GreetManyTimesRequest{
+		Greeting: &greetpb.Greeting{
+			FirstName: "Will",
+			LastName:  "Shen",
+		},
+	}
+	respStream, err := c.GreetManyTimes(context.Background(), req)
+	if err != nil {
+		log.Fatalf("error while calling GreetManyTimes RPC: %v", err)
+	}
+	for {
+		msg, err := respStream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("error while reading stream: %v", err)
+		}
+		log.Printf("Response from GreetManyTimes: %v", msg.GetResult())
+	}
 
 }
 

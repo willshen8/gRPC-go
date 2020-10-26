@@ -1,4 +1,4 @@
-# pRPC-Go 
+# gRPC-Go 
 
 This a simple project illustrates how gPRC works with Go with server and client implementations.
 
